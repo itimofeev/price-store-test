@@ -33,7 +33,7 @@ type Store struct {
 	db *pg.DB
 }
 
-func (s *Store) SaveProduct(updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error) {
+func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error) {
 	sql := `
 		INSERT INTO
 			products (name, price, last_update)
@@ -47,11 +47,24 @@ func (s *Store) SaveProduct(updateTime time.Time, product model.ParsedProduct) (
 		RETURNING *
 	`
 
-	_, err = s.db.QueryOne(&saved, sql, product.Name, product.Price, updateTime)
+	_, err = s.db.WithContext(ctx).QueryOne(&saved, sql, product.Name, product.Price, updateTime)
 	if err != nil {
 		return saved, fmt.Errorf("failed to save product: %w", err)
 	}
 	return saved, nil
+}
+
+func (s *Store) ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error) {
+	query := s.db.WithContext(ctx).
+		Model(&products).
+		Order(order).
+		Limit(limit).
+		Offset(offset)
+	if err = query.Select(); err != nil {
+		return nil, fmt.Errorf("failed to select products: %w", err)
+	}
+
+	return products, nil
 }
 
 type dbLogger struct {

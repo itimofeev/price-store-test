@@ -1,6 +1,4 @@
 
-
-
 lint:
 	docker run --rm \
 		-v $(shell pwd):/go/src/github.com/itimoveev/price-store-test \
