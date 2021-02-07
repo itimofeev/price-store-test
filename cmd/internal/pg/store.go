@@ -1,4 +1,71 @@
 package pg
 
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/go-pg/pg/v10"
+	logger "github.com/sirupsen/logrus"
+
+	"github.com/itimofeev/price-store-test/cmd/internal/model"
+)
+
+// postgresql://postgres:password@localhost:5432/postgres?sslmode=disable
+func New(log *logger.Logger, url string) *Store {
+	opts, err := pg.ParseURL(url)
+	if err != nil {
+		panic(err)
+	}
+	db := pg.Connect(opts)
+	db.AddQueryHook(dbLogger{log: log})
+	if err := db.Ping(context.Background()); err != nil {
+		panic(err)
+	}
+
+	if err := doMigrationIfNeeded(db); err != nil {
+		panic(err)
+	}
+	return &Store{db: db}
+}
+
 type Store struct {
+	db *pg.DB
+}
+
+func (s *Store) SaveProduct(updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error) {
+	sql := `
+		INSERT INTO
+			products (name, price, last_update)
+		VALUES
+			(?, ?, ?)
+		ON CONFLICT (name) DO UPDATE
+			SET
+				price        = excluded.price,
+				last_update  = excluded.last_update,
+				update_count = products.update_count + 1
+		RETURNING *
+	`
+
+	_, err = s.db.QueryOne(&saved, sql, product.Name, product.Price, updateTime)
+	if err != nil {
+		return saved, fmt.Errorf("failed to save product: %w", err)
+	}
+	return saved, nil
+}
+
+type dbLogger struct {
+	log *logger.Logger
+}
+
+func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Context, error) {
+	return c, nil
+}
+
+func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
+	if d.log != nil {
+		query, _ := q.FormattedQuery()
+		d.log.WithField("query", string(query)).Debug("query log")
+	}
+	return nil
 }
