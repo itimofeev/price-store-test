@@ -7,6 +7,8 @@ import (
 
 	logger "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+
+	"github.com/itimofeev/price-store-test/cmd/internal/util"
 )
 
 func TestName(t *testing.T) {
@@ -15,7 +17,7 @@ hello;world`
 	reader := strings.NewReader(testCSV)
 	log := logger.New()
 
-	parser := New(log, &readCloser{Reader: reader})
+	parser := New(log, &util.SimpleReadCloser{Reader: reader})
 
 	next, err := parser.Next()
 	require.NoError(t, err)
@@ -29,12 +31,4 @@ hello;world`
 
 	_, err = parser.Next()
 	require.Equal(t, io.EOF, err)
-}
-
-type readCloser struct {
-	io.Reader
-}
-
-func (rc *readCloser) Close() error {
-	return nil
 }

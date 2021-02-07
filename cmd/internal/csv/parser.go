@@ -3,7 +3,10 @@ package csv
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
+	"regexp"
+	"strconv"
 	"strings"
 
 	logger "github.com/sirupsen/logrus"
@@ -29,6 +32,11 @@ type Parser struct {
 
 const numberOfColumns = 2
 
+// regexp allows 0-2 signs after delimiter
+// allowed: .0, 0.10
+// not allowed: .
+var floatRegexp = regexp.MustCompile("^\\d*(\\.\\d{1,2})$")
+
 // Next returns next parsed struct {product_name;price} from stream
 func (p *Parser) Next() (model.ParsedProduct, error) {
 	row, err := p.reader.Read()
@@ -43,8 +51,18 @@ func (p *Parser) Next() (model.ParsedProduct, error) {
 		return model.ParsedProduct{}, errors.New("invalid CSV format, len of columns != 2")
 	}
 
+	priceStr := strings.TrimSpace(row[1])
+	if !floatRegexp.MatchString(priceStr) {
+		return model.ParsedProduct{}, fmt.Errorf("invalid price: %s", row[1])
+	}
+	priceStr = strings.Replace(priceStr, ".", "", 1)
+	price, err := strconv.ParseInt(priceStr, 10, 64)
+	if err != nil {
+		return model.ParsedProduct{}, fmt.Errorf("unable to parse price: %w", err)
+	}
+
 	return model.ParsedProduct{
 		Name:  strings.TrimSpace(row[0]),
-		Price: strings.TrimSpace(row[1]),
+		Price: price,
 	}, nil
 }

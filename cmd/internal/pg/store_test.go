@@ -7,8 +7,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/rs/xid"
-
 	"github.com/itimofeev/price-store-test/cmd/internal/model"
 	"github.com/itimofeev/price-store-test/cmd/internal/util"
 )
@@ -17,7 +15,7 @@ func TestSaveProduct(t *testing.T) {
 	ctx := context.Background()
 	store := New(util.NewLog(), "postgresql://postgres:password@localhost:5432/postgres?sslmode=disable")
 
-	productName := RandomID()
+	productName := util.RandomID()
 	var product1, product2 model.Product
 	var err error
 
@@ -54,8 +52,4 @@ func TestSaveProduct(t *testing.T) {
 
 		require.Equal(t, product2, products[0])
 	})
-}
-
-func RandomID() string {
-	return xid.New().String()
 }
