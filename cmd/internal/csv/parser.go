@@ -27,6 +27,8 @@ type Parser struct {
 	reader *csv.Reader
 }
 
+const numberOfColumns = 2
+
 // Next returns next parsed struct {product_name;price} from stream
 func (p *Parser) Next() (model.ParsedProduct, error) {
 	row, err := p.reader.Read()
@@ -37,7 +39,7 @@ func (p *Parser) Next() (model.ParsedProduct, error) {
 		return model.ParsedProduct{}, err
 	}
 
-	if len(row) != 2 {
+	if len(row) != numberOfColumns {
 		return model.ParsedProduct{}, errors.New("invalid CSV format, len of columns != 2")
 	}
 

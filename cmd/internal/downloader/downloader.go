@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,8 +19,12 @@ type Downloader struct {
 
 // GetCSV downloads csv by passed URL
 // client of this method is responsible for closing returned io.ReadCloser
-func (d *Downloader) GetCSV(url string) (io.ReadCloser, error) {
-	resp, err := d.client.Get(url)
+func (d *Downloader) GetCSV(ctx context.Context, url string) (io.ReadCloser, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("new request failed: %w", err)
+	}
+	resp, err := d.client.Do(req) //nolint:bodyclose
 	if err != nil {
 		return nil, fmt.Errorf("get url failed: %w", err)
 	}
