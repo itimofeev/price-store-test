@@ -9,4 +9,5 @@ require (
 	github.com/rs/xid v1.2.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.7.0
+	go.mongodb.org/mongo-driver v1.4.6
 )
