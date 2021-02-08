@@ -20,3 +20,6 @@ Having that, just run `make deploy` that will
 * deploy mongo and postgres
 * build and deploy in two instances price-store app
 * deploy nginx that will round robin requests to one of price-store instance
+
+# Demo
+You can see how it works here https://asciinema.org/a/P4ZWISQNoizTgpgazD8Oa05w4

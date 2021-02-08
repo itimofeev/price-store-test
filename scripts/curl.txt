@@ -1,8 +1,8 @@
-
+curl "http://localhost:4000/listProducts" | jq
 curl -v -X POST "http://localhost:4000/processCSV?url=http://localhost:3000/exampleCSV1"
-
 curl -v -X POST "http://localhost:4000/processCSV?url=http://localhost:3000/exampleCSV2"
-
 curl "http://localhost:4000/listProducts?limit=1&order=name" | jq
-curl "http://localhost:4000/listProducts?limit=1&order=price" | jq
+curl "http://localhost:4000/listProducts?limit=1&order=lastUpdate" | jq
+
+
 

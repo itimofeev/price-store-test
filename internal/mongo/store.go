@@ -82,7 +82,9 @@ func (s *Store) ListProducts(ctx context.Context, order string, limit, offset in
 	opts := &options.FindOptions{
 		Limit: &limit64,
 		Skip:  &offset64,
-		Sort:  bson.D{{order, 1}},
+	}
+	if order != "" {
+		opts.Sort = bson.D{{order, 1}}
 	}
 	cur, err := s.productsCollection().Find(ctx, bson.D{}, opts)
 	if err != nil {
