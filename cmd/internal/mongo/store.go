@@ -43,7 +43,7 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 	opts := options.Update().SetUpsert(true)
 
 	update := bson.D{
-		{"$set", bson.D{{"price", product.Price}, {"lastUpdate", time.Now()}}},
+		{"$set", bson.D{{"price", product.Price}, {"lastUpdate", updateTime}}},
 		{"$inc", bson.D{{"updateCount", 1}}},
 	}
 
