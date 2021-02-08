@@ -7,10 +7,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/model"
-	"github.com/itimofeev/price-store-test/cmd/internal/mongo"
-	"github.com/itimofeev/price-store-test/cmd/internal/pg"
-	"github.com/itimofeev/price-store-test/cmd/internal/util"
+	"github.com/itimofeev/price-store-test/internal/model"
+	"github.com/itimofeev/price-store-test/internal/mongo"
+	"github.com/itimofeev/price-store-test/internal/pg"
+	"github.com/itimofeev/price-store-test/internal/util"
 )
 
 func TestMongoStore(t *testing.T) {

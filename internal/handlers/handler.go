@@ -7,7 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/service"
+	"github.com/itimofeev/price-store-test/internal/service"
 )
 
 func InitApp(srv *service.Service) *fiber.App {

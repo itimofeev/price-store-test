@@ -11,7 +11,7 @@ import (
 
 	logger "github.com/sirupsen/logrus"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/model"
+	"github.com/itimofeev/price-store-test/internal/model"
 )
 
 func New(log *logger.Logger, reader io.ReadCloser) *Parser {
@@ -35,7 +35,7 @@ const numberOfColumns = 2
 // regexp allows 0-2 signs after delimiter
 // allowed: .0, 0.10
 // not allowed: .
-var floatRegexp = regexp.MustCompile(`^\d*(\.\d{1,2})$`)
+var floatRegexp = regexp.MustCompile(`^\d*(\.\d{1,2})?$`)
 
 // Next returns next parsed struct {product_name;price} from stream
 func (p *Parser) Next() (model.ParsedProduct, error) {

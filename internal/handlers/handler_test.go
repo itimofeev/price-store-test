@@ -15,10 +15,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/require"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/model"
-	"github.com/itimofeev/price-store-test/cmd/internal/pg"
-	"github.com/itimofeev/price-store-test/cmd/internal/service"
-	"github.com/itimofeev/price-store-test/cmd/internal/util"
+	"github.com/itimofeev/price-store-test/internal/model"
+	"github.com/itimofeev/price-store-test/internal/pg"
+	"github.com/itimofeev/price-store-test/internal/service"
+	"github.com/itimofeev/price-store-test/internal/util"
 )
 
 type fakeDownloader struct {

@@ -8,8 +8,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/csv"
-	"github.com/itimofeev/price-store-test/cmd/internal/model"
+	"github.com/itimofeev/price-store-test/internal/csv"
+	"github.com/itimofeev/price-store-test/internal/model"
 )
 
 type Downloader interface {

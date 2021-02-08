@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/model"
+	"github.com/itimofeev/price-store-test/internal/model"
 )
 
 func New(url string) *Store {
@@ -66,7 +66,6 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 	}
 
 	return decodeProduct(cur)
-
 }
 
 func (s *Store) ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error) {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/itimofeev/price-store-test/cmd/internal/downloader"
-	"github.com/itimofeev/price-store-test/cmd/internal/handlers"
-	"github.com/itimofeev/price-store-test/cmd/internal/pg"
-	"github.com/itimofeev/price-store-test/cmd/internal/service"
-	"github.com/itimofeev/price-store-test/cmd/internal/util"
+	"github.com/itimofeev/price-store-test/internal/downloader"
+	"github.com/itimofeev/price-store-test/internal/handlers"
+	"github.com/itimofeev/price-store-test/internal/pg"
+	"github.com/itimofeev/price-store-test/internal/service"
+	"github.com/itimofeev/price-store-test/internal/util"
 )
 
 const pgURL = "postgresql://postgres:password@localhost:5432/postgres?sslmode=disable"

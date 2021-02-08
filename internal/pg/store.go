@@ -8,8 +8,8 @@ import (
 	"github.com/go-pg/pg/v10"
 	logger "github.com/sirupsen/logrus"
 
-	"github.com/itimofeev/price-store-test/cmd/internal/model"
-	"github.com/itimofeev/price-store-test/cmd/internal/util"
+	"github.com/itimofeev/price-store-test/internal/model"
+	"github.com/itimofeev/price-store-test/internal/util"
 )
 
 func New(log *logger.Logger, url string) *Store {
