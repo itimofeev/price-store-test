@@ -1,4 +1,4 @@
-// nolint:govet
+// nolint:govet,gomnd
 package mongo
 
 import (
@@ -29,7 +29,7 @@ func New(url string) *Store {
 	breaker, cancel := context.WithTimeout(context.Background(), time.Second*100)
 	defer cancel()
 	if err := retry.Do(breaker, func(ctx context.Context) error {
-		ctx, cancel = context.WithTimeout(context.Background(), 1*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
 		defer cancel()
 		return client.Ping(ctx, readpref.Primary())
 	}, strategy.Limit(5), strategy.Backoff(backoff.Linear(time.Second))); err != nil {
