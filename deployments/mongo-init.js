@@ -15,9 +15,6 @@ db.products.createIndex(
   {
       "lastUpdate": 1,
       "lastUpdate": -1,
-  },
-  {
-      unique: true,
   }
 )
 

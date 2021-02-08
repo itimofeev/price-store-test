@@ -16,3 +16,6 @@ deploy:
 stop:
 	docker-compose -f deployments/docker-compose.yml kill
 	docker-compose -f deployments/docker-compose.yml rm -f
+
+rebuild: stop build-image deploy
+redeploy: stop deploy

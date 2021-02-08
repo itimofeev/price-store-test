@@ -17,7 +17,7 @@ func InitApp(srv *service.Service) *fiber.App {
 		},
 	})
 
-	app.Get("/processCSV", processCSV(srv))
+	app.Post("/processCSV", processCSV(srv))
 	app.Get("/listProducts", listProducts(srv))
 
 	app.Get("/exampleCSV1", exampleCSV1())

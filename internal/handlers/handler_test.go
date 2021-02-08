@@ -32,7 +32,7 @@ func (f *fakeDownloader) GetCSV(context.Context, string) (io.ReadCloser, error) 
 func TestHandler(t *testing.T) {
 	h, productName := initApp()
 
-	processRequest := httptest.NewRequest(http.MethodGet, "/processCSV?url=hello", nil)
+	processRequest := httptest.NewRequest(http.MethodPost, "/processCSV?url=hello", nil)
 
 	resp, err := h.Test(processRequest, -1)
 	require.NoError(t, err)

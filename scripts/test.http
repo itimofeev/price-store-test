@@ -1,0 +1,12 @@
+POST http://localhost:3000/processCSV?url=http://localhost:3000/exampleCSV1
+
+###
+
+POST http://localhost:3000/processCSV?url=http://localhost:3000/exampleCSV2
+
+###
+
+GET http://localhost:3000/listProducts?limit=1&order=name DESC
+Accept: application/json
+
+###

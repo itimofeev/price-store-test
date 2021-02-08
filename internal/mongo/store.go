@@ -76,6 +76,7 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 }
 
 func (s *Store) ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error) {
+	products = make([]model.Product, 0)
 	limit64 := int64(limit)
 	offset64 := int64(offset)
 	opts := &options.FindOptions{
@@ -112,7 +113,7 @@ func decodeProduct(cur *mongo.Cursor) (product model.Product, err error) {
 		return product, fmt.Errorf("failed to decode result from mongo: %w", err)
 	}
 	m := result.Map()
-	product.ID = m["_id"].(primitive.ObjectID).String()
+	product.ID = m["_id"].(primitive.ObjectID).Hex()
 	product.Price = decodeInt(m["price"])
 	product.Name = m["name"].(string)
 	lastUpdateDT := m["lastUpdate"].(primitive.DateTime)

@@ -64,6 +64,7 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 }
 
 func (s *Store) ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error) {
+	products = make([]model.Product, 0)
 	query := s.db.WithContext(ctx).
 		Model(&products).
 		Order(order).

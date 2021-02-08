@@ -8,9 +8,9 @@ type ParsedProduct struct {
 }
 
 type Product struct {
-	ID          string
-	Name        string
-	Price       int64
-	LastUpdate  time.Time
-	UpdateCount int64
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Price       int64     `json:"price"`
+	LastUpdate  time.Time `json:"lastUpdate"`
+	UpdateCount int64     `json:"updateCount"`
 }
