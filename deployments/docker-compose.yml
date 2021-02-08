@@ -37,8 +37,20 @@ services:
     build:
       context: ..
       dockerfile: build/Dockerfile
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
+    depends_on:
+      - db
+      - mongo
     environment:
       DB_URL: mongodb://root:example@mongo:27017/db?connect=direct&authSource=admin&authMechanism=SCRAM-SHA-256
 #      DB_URL: postgresql://postgres:password@db:5432/postgres?sslmode=disable
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ../deployments/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - price-store
+    ports:
+      - "4000:4000"

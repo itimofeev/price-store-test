@@ -12,3 +12,11 @@ LTD Contact: hello@atlant.io
   Предусмотреть все варианты сортировки для реализации интерфейса в виде бесконечного скролла.
 
 Сервер должен быть запущен в 2+ экземплярах (каждый в своем Docker-контейнере) и закрыт балансировщиком, соответствующие конфигурации также должны быть предоставлены для тестовой среды.
+
+
+# Getting started
+You need to have installed make, docker and docker-compose.
+Having that, just run `make deploy` that will
+* deploy mongo and postgres
+* build and deploy in two instances price-store app
+* deploy nginx that will round robin requests to one of price-store instance

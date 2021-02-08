@@ -11,7 +11,7 @@ build-image:
 		-f build/Dockerfile .
 
 deploy:
-	docker-compose -f deployments/docker-compose.yml up -d
+	docker-compose -f deployments/docker-compose.yml up -d --scale price-store=2
 
 stop:
 	docker-compose -f deployments/docker-compose.yml kill

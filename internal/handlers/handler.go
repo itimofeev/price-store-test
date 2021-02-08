@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/itimofeev/price-store-test/internal/service"
 )
@@ -16,6 +17,8 @@ func InitApp(srv *service.Service) *fiber.App {
 			return fiber.DefaultErrorHandler(c, err)
 		},
 	})
+
+	app.Use(logger.New())
 
 	app.Post("/processCSV", processCSV(srv))
 	app.Get("/listProducts", listProducts(srv))
