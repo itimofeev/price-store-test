@@ -31,3 +31,14 @@ services:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: password
+
+  price-store:
+    image: price-store
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_URL: mongodb://root:example@mongo:27017/db?connect=direct&authSource=admin&authMechanism=SCRAM-SHA-256
+#      DB_URL: postgresql://postgres:password@db:5432/postgres?sslmode=disable

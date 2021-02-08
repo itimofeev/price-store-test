@@ -6,6 +6,9 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/kamilsk/retry/v5"
+	"github.com/kamilsk/retry/v5/backoff"
+	"github.com/kamilsk/retry/v5/strategy"
 	logger "github.com/sirupsen/logrus"
 
 	"github.com/itimofeev/price-store-test/internal/model"
@@ -17,9 +20,15 @@ func New(log *logger.Logger, url string) *Store {
 	if err != nil {
 		panic(err)
 	}
+
 	db := pg.Connect(opts)
 	db.AddQueryHook(dbLogger{log: log})
-	if err := db.Ping(context.Background()); err != nil {
+
+	breaker, cancel := context.WithTimeout(context.Background(), time.Second*100)
+	defer cancel()
+	if err := retry.Do(breaker, func(ctx context.Context) error {
+		return db.Ping(context.Background())
+	}, strategy.Limit(5), strategy.Backoff(backoff.Linear(time.Second))); err != nil {
 		panic(err)
 	}
 

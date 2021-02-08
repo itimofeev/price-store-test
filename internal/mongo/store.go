@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kamilsk/retry/v5"
+	"github.com/kamilsk/retry/v5/backoff"
+	"github.com/kamilsk/retry/v5/strategy"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,9 +26,13 @@ func New(url string) *Store {
 		panic(err)
 	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), 1*time.Second)
+	breaker, cancel := context.WithTimeout(context.Background(), time.Second*100)
 	defer cancel()
-	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+	if err := retry.Do(breaker, func(ctx context.Context) error {
+		ctx, cancel = context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		return client.Ping(ctx, readpref.Primary())
+	}, strategy.Limit(5), strategy.Backoff(backoff.Linear(time.Second))); err != nil {
 		panic(err)
 	}
 
