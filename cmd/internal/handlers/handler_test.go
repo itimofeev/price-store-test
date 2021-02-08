@@ -25,7 +25,7 @@ type fakeDownloader struct {
 	s string
 }
 
-func (f *fakeDownloader) GetCSV(ctx context.Context, url string) (io.ReadCloser, error) {
+func (f *fakeDownloader) GetCSV(context.Context, string) (io.ReadCloser, error) {
 	return &util.SimpleReadCloser{Reader: strings.NewReader(f.s)}, nil
 }
 
@@ -65,15 +65,17 @@ func TestInvalidParams(t *testing.T) {
 	listRequest := httptest.NewRequest(http.MethodGet, "/listProducts?"+query, nil)
 	resp, err := h.Test(listRequest, -1)
 	require.NoError(t, err)
+	defer resp.Body.Close()
 	require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 
 	all, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
-	require.Equal(t, "failed to list products in service: failed to select products: ERROR #42703 column \"invalidColumn\" does not exist", string(all))
+	const expected = "failed to list products in service: failed to select products: ERROR #42703 column \"invalidColumn\" does not exist"
+	require.Equal(t, expected, string(all))
 }
 
-func initApp() (*fiber.App, string) {
-	productName := util.RandomID()
+func initApp() (app *fiber.App, productName string) {
+	productName = util.RandomID()
 	testCSV := fmt.Sprintf("%s;10.01", productName)
 
 	log := util.NewLog()
@@ -81,6 +83,6 @@ func initApp() (*fiber.App, string) {
 	store := pg.New(log, "postgresql://postgres:password@localhost:5432/postgres?sslmode=disable")
 	srv := service.New(log, d, store)
 
-	app := InitApp(srv)
+	app = InitApp(srv)
 	return app, productName
 }

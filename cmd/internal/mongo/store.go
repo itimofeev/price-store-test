@@ -1,3 +1,4 @@
+// nolint:govet
 package mongo
 
 import (
@@ -14,7 +15,6 @@ import (
 	"github.com/itimofeev/price-store-test/cmd/internal/model"
 )
 
-// "mongodb://localhost:27017"
 func New(url string) *Store {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
@@ -58,18 +58,15 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 	}
 	defer cur.Close(ctx)
 
-	for cur.Next(ctx) {
-		saved, err = decodeProduct(cur)
-		if err != nil {
-			return saved, err
-		}
-
-		return saved, nil
+	if !cur.Next(ctx) {
+		return saved, fmt.Errorf("product not found by name: %w", err)
 	}
 	if err := cur.Err(); err != nil {
 		return saved, fmt.Errorf("failed cursor error: %w", err)
 	}
-	return saved, fmt.Errorf("product not found by name: %w", err)
+
+	return decodeProduct(cur)
+
 }
 
 func (s *Store) ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error) {
@@ -109,11 +106,12 @@ func decodeProduct(cur *mongo.Cursor) (product model.Product, err error) {
 		return product, fmt.Errorf("failed to decode result from mongo: %w", err)
 	}
 	m := result.Map()
+	product.ID = m["_id"].(primitive.ObjectID).String()
 	product.Price = decodeInt(m["price"])
 	product.Name = m["name"].(string)
 	lastUpdateDT := m["lastUpdate"].(primitive.DateTime)
 	product.LastUpdate = lastUpdateDT.Time()
-	product.UpdateCount = decodeInt(m["updateCount"])
+	product.UpdateCount = decodeInt(m["updateCount"]) - 1
 
 	return product, nil
 }

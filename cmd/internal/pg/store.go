@@ -9,9 +9,9 @@ import (
 	logger "github.com/sirupsen/logrus"
 
 	"github.com/itimofeev/price-store-test/cmd/internal/model"
+	"github.com/itimofeev/price-store-test/cmd/internal/util"
 )
 
-// postgresql://postgres:password@localhost:5432/postgres?sslmode=disable
 func New(log *logger.Logger, url string) *Store {
 	opts, err := pg.ParseURL(url)
 	if err != nil {
@@ -36,9 +36,9 @@ type Store struct {
 func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error) {
 	sql := `
 		INSERT INTO
-			products (name, price, last_update)
+			products (id, name, price, last_update)
 		VALUES
-			(?, ?, ?)
+			(?, ?, ?, ?)
 		ON CONFLICT (name) DO UPDATE
 			SET
 				price        = excluded.price,
@@ -47,7 +47,7 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 		RETURNING *
 	`
 
-	_, err = s.db.WithContext(ctx).QueryOne(&saved, sql, product.Name, product.Price, updateTime)
+	_, err = s.db.WithContext(ctx).QueryOne(&saved, sql, util.RandomID(), product.Name, product.Price, updateTime)
 	if err != nil {
 		return saved, fmt.Errorf("failed to save product: %w", err)
 	}

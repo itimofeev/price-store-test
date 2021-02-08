@@ -1,4 +1,4 @@
-package pg
+package internal
 
 import (
 	"context"
@@ -8,12 +8,28 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/itimofeev/price-store-test/cmd/internal/model"
+	"github.com/itimofeev/price-store-test/cmd/internal/mongo"
+	"github.com/itimofeev/price-store-test/cmd/internal/pg"
 	"github.com/itimofeev/price-store-test/cmd/internal/util"
 )
 
-func TestSaveProduct(t *testing.T) {
+func TestMongoStore(t *testing.T) {
+	store := mongo.New("mongodb://root:example@localhost:27017/db?connect=direct&authSource=admin&authMechanism=SCRAM-SHA-256")
+	testStore(t, store)
+}
+
+func TestPgStore(t *testing.T) {
+	store := pg.New(util.NewLog(), "postgresql://postgres:password@localhost:5432/postgres?sslmode=disable")
+	testStore(t, store)
+}
+
+type Store interface {
+	SaveProduct(ctx context.Context, updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error)
+	ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error)
+}
+
+func testStore(t *testing.T, store Store) {
 	ctx := context.Background()
-	store := New(util.NewLog(), "postgresql://postgres:password@localhost:5432/postgres?sslmode=disable")
 
 	productName := util.RandomID()
 	var product1, product2 model.Product

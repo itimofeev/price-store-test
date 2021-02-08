@@ -52,7 +52,7 @@ func listProducts(srv *service.Service) func(c *fiber.Ctx) error {
 func processCSV(srv *service.Service) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		url := c.Query("url", "")
-		if len(url) == 0 {
+		if url == "" {
 			return errBadRequest("url is invalid")
 		}
 

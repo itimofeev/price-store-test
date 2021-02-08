@@ -8,7 +8,7 @@ type ParsedProduct struct {
 }
 
 type Product struct {
-	ID          int64
+	ID          string
 	Name        string
 	Price       int64
 	LastUpdate  time.Time
