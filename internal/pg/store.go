@@ -52,8 +52,8 @@ func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product m
 		ON CONFLICT (name) DO UPDATE
 			SET
 				price        = excluded.price,
-				last_update  = excluded.last_update,
-				update_count = products.update_count + 1
+				last_update  = CASE WHEN products.price <> excluded.price THEN excluded.last_update ELSE products.last_update END,
+				update_count = CASE WHEN products.price <> excluded.price THEN products.update_count + 1 ELSE products.update_count END
 		RETURNING *
 	`
 
@@ -76,6 +76,10 @@ func (s *Store) ListProducts(ctx context.Context, order string, limit, offset in
 	}
 
 	return products, nil
+}
+
+func (s *Store) GetLastUpdateOrder() string {
+	return "last_update DESC"
 }
 
 type dbLogger struct {

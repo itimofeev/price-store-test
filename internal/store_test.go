@@ -26,6 +26,7 @@ func TestPgStore(t *testing.T) {
 type Store interface {
 	SaveProduct(ctx context.Context, updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error)
 	ListProducts(ctx context.Context, order string, limit, offset int) (products []model.Product, err error)
+	GetLastUpdateOrder() string
 }
 
 func testStore(t *testing.T, store Store) {
@@ -36,6 +37,17 @@ func testStore(t *testing.T, store Store) {
 	var err error
 
 	t.Run("save new product", func(t *testing.T) {
+		product1, err = store.SaveProduct(ctx, time.Now(), model.ParsedProduct{
+			Name:  productName,
+			Price: 1001,
+		})
+		require.NoError(t, err)
+		require.Equal(t, productName, product1.Name)
+		require.EqualValues(t, 1001, product1.Price)
+		require.EqualValues(t, 0, product1.UpdateCount)
+	})
+
+	t.Run("price update will not cause change of updateCount", func(t *testing.T) {
 		product1, err = store.SaveProduct(ctx, time.Now(), model.ParsedProduct{
 			Name:  productName,
 			Price: 1001,
@@ -62,7 +74,7 @@ func testStore(t *testing.T, store Store) {
 	})
 
 	t.Run("list last updated product", func(t *testing.T) {
-		products, err := store.ListProducts(ctx, "last_update DESC", 1, 0)
+		products, err := store.ListProducts(ctx, store.GetLastUpdateOrder(), 1, 0)
 		require.NoError(t, err)
 		require.Len(t, products, 1)
 

@@ -45,18 +45,44 @@ type Store struct {
 	client *mongo.Client
 }
 
-func (s *Store) SaveProduct(ctx context.Context, updateTime time.Time, product model.ParsedProduct) (saved model.Product, err error) {
+func (s *Store) SaveProduct(ctx context.Context, _ time.Time, product model.ParsedProduct) (saved model.Product, err error) {
 	filter := bson.D{{"name", product.Name}}
-	opts := options.Update().SetUpsert(true)
-
+	findAndReplaceOpts := options.FindOneAndUpdate().SetUpsert(true)
 	update := bson.D{
-		{"$set", bson.D{{"price", product.Price}, {"lastUpdate", updateTime}}},
-		{"$inc", bson.D{{"updateCount", 1}}},
+		{"$set", bson.D{{"name", product.Name}, {"price", product.Price}}},
 	}
 
-	_, err = s.productsCollection().UpdateOne(ctx, filter, update, opts)
-	if err != nil {
-		return saved, fmt.Errorf("failed to save product in mongo: %w", err)
+	findOneAndUpdateResult := s.productsCollection().FindOneAndUpdate(ctx, filter, update, findAndReplaceOpts)
+	if err := findOneAndUpdateResult.Err(); err != nil && err != mongo.ErrNoDocuments {
+		return saved, fmt.Errorf("failed cursor error: %w", err)
+	}
+
+	if findOneAndUpdateResult.Err() == mongo.ErrNoDocuments {
+		// document not exists yet, updates updateCount and lastUpdate
+		update = bson.D{
+			{"$set", bson.D{{"updateCount", 0}}},
+			{"$currentDate", bson.D{{"lastUpdate", true}}},
+		}
+		_, err := s.productsCollection().UpdateOne(ctx, filter, update)
+		if err != nil {
+			return saved, fmt.Errorf("failed to update one: %w", err)
+		}
+	} else {
+		previous, err := decodeProduct(findOneAndUpdateResult)
+		if err != nil {
+			return saved, fmt.Errorf("failed to decode: %w", err)
+		}
+
+		if previous.Price != product.Price {
+			update = bson.D{
+				{"$currentDate", bson.D{{"lastUpdate", true}}},
+				{"$inc", bson.D{{"updateCount", 1}}},
+			}
+			_, err := s.productsCollection().UpdateOne(ctx, filter, update)
+			if err != nil {
+				return saved, fmt.Errorf("failed to update one: %w", err)
+			}
+		}
 	}
 
 	cur, err := s.productsCollection().Find(ctx, filter)
@@ -84,7 +110,7 @@ func (s *Store) ListProducts(ctx context.Context, order string, limit, offset in
 		Skip:  &offset64,
 	}
 	if order != "" {
-		opts.Sort = bson.D{{order, 1}}
+		opts.Sort = bson.D{{order, -1}}
 	}
 	cur, err := s.productsCollection().Find(ctx, bson.D{}, opts)
 	if err != nil {
@@ -105,11 +131,19 @@ func (s *Store) ListProducts(ctx context.Context, order string, limit, offset in
 	return products, nil
 }
 
+func (s *Store) GetLastUpdateOrder() string {
+	return "lastUpdate"
+}
+
 func (s *Store) productsCollection() *mongo.Collection {
 	return s.client.Database("db").Collection("products")
 }
 
-func decodeProduct(cur *mongo.Cursor) (product model.Product, err error) {
+type Decoder interface {
+	Decode(interface{}) error
+}
+
+func decodeProduct(cur Decoder) (product model.Product, err error) {
 	var result bson.D
 	if err := cur.Decode(&result); err != nil {
 		return product, fmt.Errorf("failed to decode result from mongo: %w", err)
@@ -120,7 +154,7 @@ func decodeProduct(cur *mongo.Cursor) (product model.Product, err error) {
 	product.Name = m["name"].(string)
 	lastUpdateDT := m["lastUpdate"].(primitive.DateTime)
 	product.LastUpdate = lastUpdateDT.Time()
-	product.UpdateCount = decodeInt(m["updateCount"]) - 1
+	product.UpdateCount = decodeInt(m["updateCount"])
 
 	return product, nil
 }
